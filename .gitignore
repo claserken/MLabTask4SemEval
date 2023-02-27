@@ -2,6 +2,9 @@
 .vector_cache/
 BERT/saved_models/
 
+# Apple storage handling
+.DS_Store
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
