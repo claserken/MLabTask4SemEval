@@ -48,7 +48,7 @@ class Trainer:
               print("Training Loss: " + str(loss))
               if iter_num % iter_print == 0:
                 stats = ModelStatistics(self.model, self.valid_loader, self.train_params['pad_length'], self.train_params['num_classes'])
-                stats.print_stats("Validation")
+                stats.print_stats("VALIDATION")
 
 class ModelStatistics:
     def __init__(self, model, dataloader, pad_length, num_classes):
@@ -98,6 +98,7 @@ class ModelStatistics:
     def print_stats(self, data_name):
        loss, confusion_mat = self.loss_and_confusion_matrix()
        f1_score = self.confusion_to_f1(confusion_mat)
-
-       print(data_name + ": " + loss)
-       print("Value-averaged F1 score: " + str(f1_score))
+       
+       print(data_name)
+       print("Loss" + ": " + str(loss))
+       print("Averaged F1 score: " + str(f1_score))
