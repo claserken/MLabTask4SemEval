@@ -1,3 +1,6 @@
+# Random seed
+SEED = 0
+
 # Training params
 TRAIN_PARAMS = {
     "glove_dim": 100

@@ -1,4 +1,4 @@
-from config import TRAIN_PARAMS, DATA_FNAMES
+from config import SEED, TRAIN_PARAMS, DATA_FNAMES
 from data import GloveEmbedder
 from trainer import Trainer
 from sklearn import linear_model
@@ -6,7 +6,7 @@ from sklearn.utils import shuffle
 from joblib import dump, load
 import pandas as pd
 import numpy as np
-np.random.seed(0)
+np.random.seed(SEED)
 
 train_dataset = pd.read_table(DATA_FNAMES['train_arguments'])
 train_labels = pd.read_table(DATA_FNAMES['train_labels'])
