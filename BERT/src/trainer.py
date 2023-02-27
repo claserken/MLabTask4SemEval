@@ -20,7 +20,6 @@ class Trainer:
 
     def train_epoch(self, verbose, iter_print):
         self.model.train()
-        self.optimizer.zero_grad()
         for iter_num, batch in enumerate(self.train_loader):
             premise_tensor, attention_mask, labels, stance = batch
             premise_tensor = premise_tensor.reshape(-1, self.train_params['pad_length']).to(device)
@@ -41,6 +40,7 @@ class Trainer:
                           
             loss_fn = torch.nn.BCELoss(weights)
             loss = loss_fn(probs.flatten(), labels)  
+            self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
 
