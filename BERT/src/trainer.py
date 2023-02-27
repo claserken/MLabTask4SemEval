@@ -1,7 +1,7 @@
 from data import ArgumentsDataset
 from torchmetrics.classification import MultilabelConfusionMatrix
 import torch
-device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
 class Trainer:
     def __init__(self, model, train_params, data_fnames):
@@ -48,7 +48,7 @@ class Trainer:
               print("Training Loss: " + str(loss))
               if iter_num % iter_print == 0:
                 stats = ModelStatistics(self.model, self.valid_loader, self.train_params['pad_length'], self.train_params['num_classes'])
-                stats.print_stats("VALIDATION")
+                stats.print_stats(data_name="VALIDATION")
 
 class ModelStatistics:
     def __init__(self, model, dataloader, pad_length, num_classes):

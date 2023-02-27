@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from transformers import BertModel
-device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
 class StanceClassifier(torch.nn.Module):
     def __init__(self, hidden_dim, output_dim):
