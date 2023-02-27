@@ -9,9 +9,11 @@ import numpy as np
 np.random.seed(SEED)
 
 train_dataset = pd.read_table(DATA_FNAMES['train_arguments'])
+train_stances = np.array(train_dataset['Stance'] == 'in favor of', dtype=int).reshape(-1, 1)
 train_labels = pd.read_table(DATA_FNAMES['train_labels'])
 
 val_dataset = pd.read_table(DATA_FNAMES['valid_arguments'])
+val_stances = np.array(val_dataset['Stance'] == 'in favor of', dtype=int).reshape(-1, 1)
 val_labels = pd.read_table(DATA_FNAMES['valid_labels'])
 
 glove_embedder = GloveEmbedder(glove_dim=TRAIN_PARAMS['glove_dim'])
@@ -19,8 +21,8 @@ glove_embedder = GloveEmbedder(glove_dim=TRAIN_PARAMS['glove_dim'])
 sentence_cols = ['Conclusion', 'Premise']
 words_to_remove = ['the', 'a', 'an', 'of']
 
-train_dataset = glove_embedder.transform_data(train_dataset, sentence_cols, sentence_cols)
-val_dataset = glove_embedder.transform_data(val_dataset, sentence_cols, sentence_cols)
+train_dataset = np.concatenate((train_stances, glove_embedder.transform_data(train_dataset, sentence_cols, sentence_cols)), axis=1)
+val_dataset = np.concatenate((val_stances, glove_embedder.transform_data(val_dataset, sentence_cols, sentence_cols)), axis=1)
 
 all_human_values = train_labels.columns[1:]
 for label in all_human_values:
