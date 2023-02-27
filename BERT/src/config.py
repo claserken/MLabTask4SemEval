@@ -1,10 +1,13 @@
 # Training params
-NUM_EPOCHS = 5
-LR = 2e-5
-
 TRAIN_PARAMS = {
-    "num_epochs": NUM_EPOCHS,
-    "lr": LR
+    "num_epochs": 5,
+    "lr": 2e-5,
+    "pos_samples_weight": 0.5,
+    "train_batch_size": 32,
+    "val_batch_size": 512,
+    "hidden_dim": 769,
+    "pad_length": 256,
+    "num_classes": 20
 }
 
 # File locations for data
