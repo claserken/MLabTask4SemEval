@@ -86,19 +86,32 @@ class ModelStatistics:
       avg_loss = total_loss / len_data
       return avg_loss, confusion_mat
     
-    def confusion_to_f1(self, confusion_mat):
+    def confusion_based_stats(self, confusion_mat):
         sum_f1 = 0
+        sum_precision = 0
+        sum_recall = 0
+
         for value_confusion_mat in confusion_mat:
           tn, fp, fn, tp = value_confusion_mat.flatten()
           f1 = tp / (tp + 0.5 * (fp + fn))
+          precision = tp / (tp + fp)
+          recall = tp / (tp + fn)
+
           sum_f1 += f1
+          sum_precision += precision if not torch.isnan(precision) else 0 # We may not classify any argument as positive in a batch
+          sum_recall += recall
+
         avg_f1 = sum_f1 / self.num_classes
-        return avg_f1
+        avg_precision = sum_precision / self.num_classes
+        avg_recall = sum_recall / self.num_classes
+        return avg_f1, avg_precision, avg_recall
 
     def print_stats(self, data_name):
        loss, confusion_mat = self.loss_and_confusion_matrix()
-       f1_score = self.confusion_to_f1(confusion_mat)
+       f1_score, precision, recall = self.confusion_based_stats(confusion_mat)
        
        print(data_name)
        print("Loss" + ": " + str(loss))
-       print("Averaged F1 score: " + str(f1_score))
+       print("Average F1 score: " + str(f1_score))
+       print("Average precision: " + str(precision))
+       print("Average recall: " + str(recall))
