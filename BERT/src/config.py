@@ -5,8 +5,8 @@ SEED = 0
 TRAIN_PARAMS = {
     'num_epochs': 5,
     'lr': 2e-5,
-    'pos_samples_weight': 0.5,
-    'train_batch_size': 32,
+    'pos_samples_weight': 0.4,
+    'train_batch_size': 16,
     'val_batch_size': 512,
     'hidden_dim': 769,
     'pad_length': 256,
