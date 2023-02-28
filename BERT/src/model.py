@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from transformers import BertModel
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
-class StanceClassifier(torch.nn.Module):
+class ValueClassifier(torch.nn.Module):
     def __init__(self, hidden_dim, output_dim):
         super().__init__()
         bert_output_dim = 768

@@ -1,5 +1,5 @@
 from data import ArgumentsDataset
-from torchmetrics.classification import MultilabelConfusionMatrix
+from stats import LossConfusionStats
 import torch
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
@@ -47,71 +47,8 @@ class Trainer:
             if verbose:
               print("Training Loss: " + str(loss))
               if iter_num % iter_print == 0:
-                stats = ModelStatistics(self.model, self.valid_loader, self.train_params['pad_length'], self.train_params['num_classes'])
+                stats = LossConfusionStats(self.model, self.valid_loader, self.train_params['pad_length'], self.train_params['num_classes'])
                 stats.print_stats(data_name="VALIDATION")
 
-class ModelStatistics:
-    def __init__(self, model, dataloader, pad_length, num_classes):
-       self.model = model
-       self.dataloader = dataloader
-       self.pad_length = pad_length
-       self.num_classes = num_classes
-       self.loss_fn = torch.nn.BCELoss(reduction='sum')
 
-    def loss_and_confusion_matrix(self):
-      confusion_mat = None
-      total_loss = 0
-      len_data = 0
-
-      metric = MultilabelConfusionMatrix(num_labels=self.num_classes).to(device)
-      self.model.eval()
-      with torch.no_grad():
-        for batch in self.dataloader:
-          premise_tensor, attention_mask, labels, stance = batch
-          premise_tensor = premise_tensor.reshape(-1, self.pad_length).to(device)
-          attention_mask = attention_mask.reshape(-1, self.pad_length).to(device)
-          labels = labels.to(device).int()
-          stance = stance.to(device)
-          
-          probs = self.model(premise_tensor, stance, attention_mask)
-          batch_confusion_mat = metric(probs, labels)
-          if confusion_mat is not None:
-            confusion_mat += batch_confusion_mat
-          else:
-            confusion_mat = batch_confusion_mat
-
-          total_loss += self.loss_fn(probs.flatten(), labels.flatten().float())  
-          len_data += len(probs.flatten())
-
-      avg_loss = total_loss / len_data
-      return avg_loss, confusion_mat
-    
-    def confusion_based_stats(self, confusion_mat):
-        sum_f1 = 0
-        sum_precision = 0
-        sum_recall = 0
-
-        for value_confusion_mat in confusion_mat:
-          tn, fp, fn, tp = value_confusion_mat.flatten()
-          f1 = tp / (tp + 0.5 * (fp + fn))
-          precision = tp / (tp + fp)
-          recall = tp / (tp + fn)
-
-          sum_f1 += f1
-          sum_precision += precision if not torch.isnan(precision) else 0 # We may not classify any argument as positive in a batch
-          sum_recall += recall
-
-        avg_f1 = sum_f1 / self.num_classes
-        avg_precision = sum_precision / self.num_classes
-        avg_recall = sum_recall / self.num_classes
-        return avg_f1, avg_precision, avg_recall
-
-    def print_stats(self, data_name):
-       loss, confusion_mat = self.loss_and_confusion_matrix()
-       f1_score, precision, recall = self.confusion_based_stats(confusion_mat)
-       
-       print(data_name)
-       print("Loss" + ": " + str(loss))
-       print("Average F1 score: " + str(f1_score))
-       print("Average precision: " + str(precision))
-       print("Average recall: " + str(recall))
+         

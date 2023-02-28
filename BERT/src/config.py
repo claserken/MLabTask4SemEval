@@ -1,12 +1,12 @@
 # Random seed
-SEED = 0
+SEED = 1
 
 # Training params
 TRAIN_PARAMS = {
-    'num_epochs': 5,
+    'num_epochs': 9,
     'lr': 2e-5,
-    'pos_samples_weight': 0.4,
-    'train_batch_size': 16,
+    'pos_samples_weight': 0.5,
+    'train_batch_size': 64,
     'val_batch_size': 512,
     'hidden_dim': 769,
     'pad_length': 256,
@@ -29,3 +29,11 @@ DATA_FNAMES = {
     'valid_labels': VALIDATION_LABELS_FNAME
 }
 
+# Model saving
+MODEL_URI = './BERT/saved_models/'
+MODEL_NAME = 'bert_bert_b64-w50-e9'
+
+SAVE_OPTIONS = {
+    'save': False,
+    'path': MODEL_URI + MODEL_NAME
+}
