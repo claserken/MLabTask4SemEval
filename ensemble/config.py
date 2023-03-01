@@ -25,7 +25,7 @@ TRAINING_LABELS_FNAME = DATA_URI + "labels-training.tsv"
 VALIDATION_ARGUMENTS_FNAME = DATA_URI + "arguments-validation.tsv"
 VALIDATION_LABELS_FNAME = DATA_URI + "labels-validation.tsv"
 
-TEST_ARGUMENTS_FNAME = DATA_URI + "arguments-validation.tsv"
+TEST_ARGUMENTS_FNAME = DATA_URI + "arguments-test.tsv"
 
 DATA_FNAMES = {
     "train_arguments": TRAINING_ARGUMENTS_FNAME,
