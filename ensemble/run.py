@@ -1,41 +1,41 @@
-from config import TRAIN_PREDS_DIR, HUMAN_VALUES, DATA_FNAMES
-from sklearn.linear_model import LogisticRegression
+from config import MODELS_DIR, HUMAN_VALUES, DATA_FNAMES
+from BERT.src.config import TRAIN_PARAMS
+from ensemble import EnsembledModel, EnsembleStatistics
+from model import BERTPredictor, GlovePredictor
 import numpy as np
-import pandas as pd
-import torch
-from sklearn.metrics import f1_score
 
-bert_16 = torch.load(TRAIN_PREDS_DIR['bert'] + 'train_preds_bert_b16-w40-e5.pt', map_location=torch.device('cpu')).numpy()
-bert_64 = torch.load(TRAIN_PREDS_DIR['bert'] +  'train_preds_bert_b64-w50-e9.pt', map_location=torch.device('cpu')).numpy()
-glove_binary = np.load(TRAIN_PREDS_DIR['glove'] + 'glove_binary_preds.npy')
+bert_16 = BERTPredictor(MODELS_DIR['bert'] + 'bert_b16-w40-e5', TRAIN_PARAMS)
+bert_64 = BERTPredictor(MODELS_DIR['bert'] + 'bert_b64-w50-e9', TRAIN_PARAMS)
+glove_predictors = []
+glove_params = {
+    'sentence_cols': ['Conclusion', 'Premise'],
+    'words_to_remove': ['the', 'a', 'an', 'of']
+}
 
-train_labels = pd.read_table(DATA_FNAMES['train_labels'])
-log_reg_clfs = []
-f1_scores = []
-accuracies = []
-for value_idx, human_value in enumerate(HUMAN_VALUES):    
-    ensemble_train = np.column_stack((bert_16[:, value_idx], bert_64[:, value_idx], glove_binary[:, value_idx]))
-    ensemble_targets = train_labels[human_value].to_numpy()
+for human_value in HUMAN_VALUES:
+    clf_fname = MODELS_DIR['glove'] + human_value + '.joblib'
+    glove_predictor = GlovePredictor(clf_fname, glove_params)
+    glove_predictors.append(glove_predictor)
 
-    log_reg = LogisticRegression(class_weight='balanced')
-    log_reg.fit(ensemble_train, ensemble_targets)
+ensemble = EnsembledModel([[bert_16], [bert_64], glove_predictors], HUMAN_VALUES)
+ensemble.train_log_regs(DATA_FNAMES['train_arguments'], DATA_FNAMES['train_labels'])
 
-    pred_targets = log_reg.predict(ensemble_train)
-    acc = log_reg.score(ensemble_train, ensemble_targets)
-    f1 = f1_score(ensemble_targets, pred_targets)
+stats = EnsembleStatistics(ensemble)
+f1_scores = stats.f1_score(DATA_FNAMES['train_arguments'], DATA_FNAMES['train_labels'], verbose=True)
+mean_f1_score = np.mean(f1_scores)
+print(f'Average F1 score: {mean_f1_score}')
 
-    f1_scores.append(f1)
-    accuracies.append(acc)
-    log_reg_clfs.append(log_reg)
+# Test set evaluation
+# test_dataset_frame = pd.read_csv(DATA_FNAMES['test_arguments'], sep='\t')
+# labels_training = pd.read_csv(DATA_FNAMES['train_labels'], sep='\t')
 
-    print("---------------------")
-    print("Human value: ", human_value)
-    print("Accuracy: ",  acc)
-    print("F1 Score: ", f1)
+# test_preds = ensemble.ensemble_predict(DATA_FNAMES['test_arguments'])
 
-print("---------------------")
-print("Value-averaged train F1 score: ", np.mean(f1_scores))
-print("Value-averaged train accuracy: ", np.mean(accuracies))
+# final_test_results = pd.DataFrame(test_preds)
+# final_test_results.insert(loc=0, column='Argument ID', value=np.nan)
+# final_test_results['Argument ID'] = test_dataset_frame['Argument ID']
+# final_test_results.columns=labels_training.columns.values
+# final_test_results.to_csv('argument_test_preds_bert.tsv', sep="\t", index=False)
 
 
     

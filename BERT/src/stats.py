@@ -15,15 +15,20 @@ class ModelStatistics(ABC):
     def metrics(self, probs, labels):
        pass
 
-    def compute_statistics(self):
+    def compute_statistics(self, with_labels):
       batch_stats = []
       self.model.eval()
       with torch.no_grad():
         for batch in self.dataloader:
-          premise_tensor, attention_mask, labels, stance = batch
+          premise_tensor = attention_mask = labels = stance = None
+          if with_labels:
+             premise_tensor, attention_mask, labels, stance = batch
+             labels = labels.to(device).int()
+          else:
+             premise_tensor, attention_mask, stance = batch
+
           premise_tensor = premise_tensor.reshape(-1, self.pad_length).to(device)
           attention_mask = attention_mask.reshape(-1, self.pad_length).to(device)
-          labels = labels.to(device).int()
           stance = stance.to(device)
           
           probs = self.model(premise_tensor, stance, attention_mask)
@@ -42,7 +47,7 @@ class LossConfusionStats(ModelStatistics):
        return [len(probs.flatten()), loss, confusion_mat]
 
     def loss_and_confusion_matrix(self):
-       batch_stats = self.compute_statistics()
+       batch_stats = self.compute_statistics(with_labels=True)
        confusion_mat = None
        total_loss = 0
        len_data = 0
@@ -98,7 +103,7 @@ class ModelPredictions(ModelStatistics):
        return [probs]
     
     def get_probs(self):
-       batch_probs = self.compute_statistics()
+       batch_probs = self.compute_statistics(with_labels=False)
        all_probs = None
        for batch_prob in batch_probs:
           if all_probs is None:

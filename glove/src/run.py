@@ -18,15 +18,25 @@ val_dataset = glove_embedder.transform_dataset_from_file(DATA_FNAMES['valid_argu
 val_labels = pd.read_table(DATA_FNAMES['valid_labels'])
 
 all_human_values = train_labels.columns[1:]
+train_f1_scores = []
+val_f1_scores = []
 for label in all_human_values:
     train_label = train_labels[label].values
     val_label = val_labels[label].values
 
-    ridge = linear_model.RidgeClassifier(class_weight = "balanced")
+    ridge = linear_model.RidgeClassifier(class_weight='balanced')
     trainer = Trainer(ridge, *shuffle(train_dataset, train_label), val_dataset, val_label)
     trainer.train()
 
     logger = Logger(trainer, label)
-    save_path = "glove/saved_models/" + label + ".joblib"
-    logger.save_model(save_path)
-    logger.print_f1_scores()
+    # save_path = "glove/saved_models/" + label + ".joblib"
+    # logger.save_model(save_path)
+    train_f1, val_f1 = logger.print_f1_scores()
+    train_f1_scores.append(train_f1)
+    val_f1_scores.append(val_f1)
+
+mean_train_f1 = np.mean(train_f1_scores)
+mean_val_f1 = np.mean(val_f1_scores)
+print('Value-averaged train F1: ', mean_train_f1)
+print('Value-averaged validation F1: ', mean_val_f1)
+

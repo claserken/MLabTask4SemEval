@@ -28,9 +28,12 @@ class Logger:
         dump(self.trainer.model, save_path)
 
     def print_f1_scores(self):
+        train_f1 = self.trainer.f1_score("train")
+        val_f1 = self.trainer.f1_score("validation")
         print("------------------")
         print(self.value_name)
-        print("* Train F1: ", self.trainer.f1_score("train"))
-        print("* Validation F1: ", self.trainer.f1_score("validation"))
+        print("* Train F1: ", train_f1)
+        print("* Validation F1: ", val_f1)
+        return train_f1, val_f1
 
         
