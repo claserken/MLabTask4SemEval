@@ -1,9 +1,8 @@
-from config import SEED, TRAIN_PARAMS, DATA_FNAMES
+from config import TRAIN_PARAMS, DATA_FNAMES
 from joblib import load
 from data import GloveEmbedder
 import pandas as pd
 import numpy as np
-np.random.seed(SEED)
 
 glove_embedder = GloveEmbedder(glove_dim=TRAIN_PARAMS['glove_dim'])
 sentence_cols = ['Conclusion', 'Premise']
